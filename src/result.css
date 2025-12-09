@@ -1,0 +1,182 @@
+/* Toolbar Styles */
+.byp-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    background-color: var(--yt-spec-base-background, #0f0f0f);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: "Roboto", "Arial", sans-serif;
+    color: var(--yt-spec-text-secondary);
+    margin-bottom: 8px;
+}
+
+.byp-button {
+    background: transparent;
+    color: var(--yt-spec-text-primary, #f1f1f1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.2s;
+}
+
+.byp-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.byp-save-btn {
+    margin-left: 12px;
+    font-weight: bold;
+}
+
+.byp-save-btn:hover {
+    background-color: #ff0000 !important;
+}
+
+.byp-button svg {
+    fill: currentColor;
+    width: 20px;
+    height: 20px;
+}
+
+.byp-duration {
+    margin-right: auto;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--yt-spec-text-primary, #f1f1f1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.byp-hidden {
+    display: none !important;
+}
+
+/* Checkboxes */
+.byp-check-container {
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.byp-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--yt-spec-text-secondary, #aaa);
+    border-radius: 2px;
+    background: transparent;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.byp-selected .byp-checkbox {
+    background: var(--yt-spec-call-to-action, #3ea6ff);
+    border-color: var(--yt-spec-call-to-action, #3ea6ff);
+}
+
+.byp-selected .byp-checkbox::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+ytd-playlist-panel-video-renderer.byp-selected {
+    background-color: rgba(62, 166, 255, 0.1) !important;
+}
+
+/* Bulk Toolbar */
+.byp-bulk-actions {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f1f1f;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 24px;
+    display: flex;
+    gap: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    align-items: center;
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translate(-50%, 20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+.byp-bulk-count {
+    margin-right: 12px;
+    font-weight: bold;
+    color: #fff;
+}
+
+/* Drag and Drop Styles */
+ytd-playlist-panel-video-renderer.byp-draggable #reorder {
+    cursor: grab !important;
+    touch-action: none;
+}
+
+ytd-playlist-panel-video-renderer.byp-draggable #reorder:active {
+    cursor: grabbing !important;
+}
+
+.byp-dragging {
+    opacity: 0.5;
+    background-color: rgba(62, 166, 255, 0.1) !important;
+}
+
+.byp-draggable::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 2px;
+    background: var(--yt-spec-call-to-action, #3ea6ff);
+    opacity: 0;
+    transition: opacity 0.1s;
+    pointer-events: none;
+    z-index: 999;
+}
+
+.byp-drag-over-bottom::after {
+    opacity: 1;
+}
+
+.byp-drag-over-top::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -2px;
+    height: 2px;
+    background: var(--yt-spec-call-to-action, #3ea6ff);
+    opacity: 1;
+    pointer-events: none;
+    z-index: 999;
+}

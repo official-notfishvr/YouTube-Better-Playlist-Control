@@ -1,135 +1,227 @@
 /* Modern Styles for YouTube Better Playlist Control */
+/* Designed for a Premium, Glassmorphism Aesthetic */
 
 :root {
-    --byp-bg-glass: rgba(15, 15, 15, 0.6);
-    --byp-border-glass: rgba(255, 255, 255, 0.1);
+    --byp-bg-glass: rgba(20, 20, 20, 0.75);
+    --byp-bg-glass-heavy: rgba(15, 15, 15, 0.90);
+    --byp-border-glass: rgba(255, 255, 255, 0.08);
+    --byp-border-highlight: rgba(255, 255, 255, 0.15);
+
     --byp-primary: #3ea6ff;
+    --byp-primary-glow: rgba(62, 166, 255, 0.4);
+
     --byp-danger: #ff4e45;
-    --byp-text: #f1f1f1;
+    --byp-danger-glow: rgba(255, 78, 69, 0.4);
+
+    --byp-text: #ffffff;
     --byp-text-secondary: #aaaaaa;
-    --byp-radius: 12px;
+
+    --byp-radius: 16px;
     --byp-radius-sm: 8px;
-    --byp-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --byp-radius-pill: 50px;
+
+    --byp-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    --byp-shadow-hover: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+
+    --byp-transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Main Toolbar */
+/* =========================================
+   Main Toolbar
+   ========================================= */
 .byp-controls {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 20px;
+    padding: 8px 12px;
     margin: 8px 12px;
+    flex-wrap: wrap;
 
     background: var(--byp-bg-glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+
     border: 1px solid var(--byp-border-glass);
     border-radius: var(--byp-radius);
 
     font-family: "Roboto", "Arial", sans-serif;
     color: var(--byp-text-secondary);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    box-shadow: var(--byp-shadow);
+    transition: var(--byp-transition);
+
+    /* Ensure it sits nicely */
+    z-index: 10;
 }
 
 .byp-controls:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Buttons */
-.byp-button {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--byp-text);
-    border: none;
-    /* Removed border */
-    border-radius: 18px;
-    /* Pill shape */
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.byp-button:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-1px);
-}
-
-.byp-button:active {
-    transform: translateY(0) scale(0.98);
-}
-
-/* Save Button Special Style */
-.byp-save-btn {
-    margin-left: 12px;
-    background-color: var(--byp-danger) !important;
-    color: white !important;
-    box-shadow: 0 2px 8px rgba(255, 78, 69, 0.4);
-}
-
-.byp-save-btn:hover {
-    background-color: #ff6e66 !important;
-    box-shadow: 0 4px 12px rgba(255, 78, 69, 0.6);
-}
-
-.byp-button svg {
-    fill: currentColor;
-    width: 20px;
-    height: 20px;
+    border-color: var(--byp-border-highlight);
+    background: rgba(30, 30, 30, 0.8);
+    box-shadow: var(--byp-shadow-hover);
 }
 
 /* Duration Text */
 .byp-duration {
     margin-right: auto;
+    /* Pushes buttons to the right */
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--byp-text);
     display: flex;
     align-items: center;
     gap: 8px;
     opacity: 0.9;
+    letter-spacing: 0.5px;
 }
 
-.byp-hidden,
-.byp-removing {
-    display: none !important;
+.byp-duration svg {
+    fill: var(--byp-primary);
+    filter: drop-shadow(0 0 5px var(--byp-primary-glow));
 }
 
-/* Checkboxes */
+/* =========================================
+   Buttons
+   ========================================= */
+.byp-button {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--byp-text);
+    border: 1px solid transparent;
+    border-radius: var(--byp-radius-pill);
+    padding: 6px 12px;
+
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    white-space: nowrap;
+    transition: var(--byp-transition);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.byp-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+    border-color: var(--byp-border-glass);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.byp-button:active {
+    transform: translateY(0) scale(0.97);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.byp-button svg {
+    fill: currentColor;
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+}
+
+.byp-button:hover svg {
+    transform: rotate(15deg) scale(1.1);
+}
+
+/* Search Input */
+.byp-search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-right: 12px;
+}
+
+.byp-search-input {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid transparent;
+    border-radius: var(--byp-radius-pill);
+    padding: 8px 16px 8px 36px;
+    color: var(--byp-text);
+    font-size: 13px;
+    width: 200px;
+    transition: var(--byp-transition);
+    outline: none;
+}
+
+.byp-search-input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--byp-primary);
+    box-shadow: 0 0 10px rgba(62, 166, 255, 0.2);
+    width: 240px;
+}
+
+.byp-search-icon {
+    position: absolute;
+    left: 10px;
+    width: 16px;
+    height: 16px;
+    fill: var(--byp-text-secondary);
+    pointer-events: none;
+    transition: var(--byp-transition);
+}
+
+.byp-search-input:focus+.byp-search-icon {
+    fill: var(--byp-primary);
+}
+
+.byp-save-btn {
+    margin-left: 12px;
+    background: linear-gradient(135deg, #ff4e45, #ff0055) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 15px var(--byp-danger-glow);
+}
+
+.byp-save-btn:hover {
+    box-shadow: 0 6px 20px rgba(255, 0, 85, 0.6);
+    filter: brightness(1.1);
+}
+
+.byp-loading {
+    opacity: 0.7;
+    pointer-events: none;
+    cursor: wait;
+}
+
+/* =========================================
+   Checkboxes
+   ========================================= */
 .byp-check-container {
-    padding: 0 8px;
+    padding: 0 12px 0 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    z-index: 5;
+    /* Ensure clickable above other elements */
 }
 
 .byp-checkbox {
     width: 20px;
     height: 20px;
     border: 2px solid var(--byp-text-secondary);
-    border-radius: 4px;
-    /* Slightly more rounded */
-    background: transparent;
+    border-radius: 6px;
+    /* Squircle */
+    background: rgba(0, 0, 0, 0.3);
     position: relative;
-    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transition: var(--byp-transition);
 }
 
 .byp-checkbox:hover {
     border-color: var(--byp-text);
+    background: rgba(255, 255, 255, 0.1);
 }
 
+/* Selected State for Checkbox */
 .byp-selected .byp-checkbox {
     background: var(--byp-primary);
     border-color: var(--byp-primary);
-    transform: scale(1.1);
+    box-shadow: 0 0 10px var(--byp-primary-glow);
+    transform: scale(1.05);
 }
 
 .byp-selected .byp-checkbox::after {
@@ -142,60 +234,142 @@
     border: solid white;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
+    animation: checkAnim 0.2s ease-out forwards;
 }
 
+@keyframes checkAnim {
+    from {
+        opacity: 0;
+        transform: rotate(45deg) scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: rotate(45deg) scale(1);
+    }
+}
+
+/* =========================================
+   Playlist Item States
+   ========================================= */
 ytd-playlist-panel-video-renderer.byp-selected {
-    background-color: rgba(62, 166, 255, 0.15) !important;
-    border-left: 4px solid var(--byp-primary);
+    background-color: rgba(62, 166, 255, 0.1) !important;
+    border-radius: var(--byp-radius-sm);
+    position: relative;
+    transition: background-color 0.2s ease;
 }
 
-/* Bulk Toolbar - Floating Island */
+ytd-playlist-panel-video-renderer.byp-selected::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 4px;
+    background: var(--byp-primary);
+    border-radius: 0 4px 4px 0;
+    box-shadow: 2px 0 8px var(--byp-primary-glow);
+}
+
+.byp-hidden,
+.byp-removing {
+    display: none !important;
+}
+
+/* =========================================
+   Bulk Toolbar - Floating Island
+   ========================================= */
 .byp-bulk-actions {
     position: fixed;
     bottom: 32px;
     left: 50%;
     transform: translateX(-50%);
 
-    background: var(--byp-bg-glass);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--byp-border-glass);
+    background: var(--byp-bg-glass-heavy);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
 
-    border-radius: 16px;
-    padding: 12px 24px;
+    border: 1px solid var(--byp-border-glass);
+    border-radius: 20px;
+    padding: 10px 20px;
+
     display: flex;
-    gap: 16px;
+    gap: 12px;
     align-items: center;
 
-    box-shadow: var(--byp-shadow);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
     z-index: 9999;
-    animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes slideUp {
     from {
-        transform: translate(-50%, 40px);
+        transform: translate(-50%, 60px) scale(0.9);
         opacity: 0;
     }
 
     to {
-        transform: translate(-50%, 0);
+        transform: translate(-50%, 0) scale(1);
         opacity: 1;
     }
 }
 
 .byp-bulk-count {
-    margin-right: 8px;
-    font-weight: bold;
-    color: #fff;
+    margin-right: 12px;
+    font-weight: 700;
+    color: white;
     font-size: 15px;
-    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 8px;
 }
 
-/* Drag and Drop Styles */
+/* Separator in toolbar */
+.byp-bulk-actions .sep {
+    width: 1px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 0 8px;
+}
+
+/* Danger / Confirm Button State */
+.byp-btn-danger {
+    background-color: rgba(204, 0, 0, 0.8) !important;
+    border: 1px solid var(--byp-danger) !important;
+    box-shadow: 0 0 10px rgba(255, 78, 69, 0.3);
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-4px);
+    }
+
+    75% {
+        transform: translateX(4px);
+    }
+}
+
+/* =========================================
+   Drag and Drop Styles
+   ========================================= */
 ytd-playlist-panel-video-renderer.byp-draggable #reorder {
     cursor: grab !important;
     touch-action: none;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+ytd-playlist-panel-video-renderer.byp-draggable:hover #reorder {
+    opacity: 1;
 }
 
 ytd-playlist-panel-video-renderer.byp-draggable #reorder:active {
@@ -203,9 +377,11 @@ ytd-playlist-panel-video-renderer.byp-draggable #reorder:active {
 }
 
 .byp-dragging {
-    opacity: 0.6;
-    background-color: rgba(62, 166, 255, 0.1) !important;
-    transform: scale(0.99);
+    opacity: 0.4;
+    background: var(--byp-bg-glass) !important;
+    transform: scale(0.98);
+    box-shadow: 0 0 0 2px var(--byp-primary) inset;
+    border-radius: var(--byp-radius-sm);
 }
 
 /* Drop Indicators */
@@ -213,21 +389,21 @@ ytd-playlist-panel-video-renderer.byp-draggable #reorder:active {
 .byp-drag-over-top::before {
     height: 3px;
     border-radius: 2px;
-    box-shadow: 0 0 4px var(--byp-primary);
+    box-shadow: 0 0 8px var(--byp-primary), 0 0 15px var(--byp-primary);
 }
 
 .byp-draggable::after {
     content: '';
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 8px;
+    right: 8px;
     bottom: -2px;
     height: 3px;
     background: var(--byp-primary);
     opacity: 0;
-    transition: opacity 0.1s;
+    transition: opacity 0.15s;
     pointer-events: none;
-    z-index: 999;
+    z-index: 100;
 }
 
 .byp-drag-over-bottom::after {
@@ -237,12 +413,12 @@ ytd-playlist-panel-video-renderer.byp-draggable #reorder:active {
 .byp-drag-over-top::before {
     content: '';
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 8px;
+    right: 8px;
     top: -2px;
     height: 3px;
     background: var(--byp-primary);
     opacity: 1;
     pointer-events: none;
-    z-index: 999;
+    z-index: 100;
 }

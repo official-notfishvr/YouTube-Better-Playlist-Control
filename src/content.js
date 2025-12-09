@@ -32,7 +32,12 @@ const ICONS = {
     down: '<svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/></svg>',
     top: '<svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8zM4 4h16v2H4z"/></svg>',
     bottom: '<svg viewBox="0 0 24 24"><path d="M4 12l1.41-1.41L11 16.17V4h2v12.17l5.58-5.59L20 12l-8 8-8-8zM4 20h16v-2H4z"/></svg>',
-    save: '<svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>'
+    save: '<svg viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>',
+    search: '<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>',
+    selectAll: '<svg viewBox="0 0 24 24"><path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/></svg>',
+    duplicate: '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>',
+    load: '<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>',
+    close: '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>'
 };
 
 function injectScript() {
@@ -102,8 +107,8 @@ async function processSave() {
     if (!btn || pendingMoves.length === 0) return;
 
     btn.innerHTML = '<span>Saving...</span>';
-    btn.style.opacity = '0.7';
-    btn.style.pointerEvents = 'none';
+    btn.classList.add('byp-loading');
+    btn.disabled = true;
 
     for (const move of pendingMoves) {
         window.postMessage({
@@ -115,13 +120,16 @@ async function processSave() {
     }
 
     pendingMoves.length = 0;
+    btn.disabled = false;
 
     const panel = document.querySelector('ytd-playlist-panel-renderer');
     if (panel) updateBulkToolbar(panel);
 }
 
-function calculateDuration(container) {
-    const items = container.querySelectorAll('ytd-playlist-panel-video-renderer:not(.byp-hidden):not(.byp-removing)');
+function calculateDuration(container, items) {
+    if (!items) {
+        items = container.querySelectorAll('ytd-playlist-panel-video-renderer:not(.byp-hidden):not(.byp-removing)');
+    }
     let totalSeconds = 0;
 
     items.forEach(item => {
@@ -130,6 +138,7 @@ function calculateDuration(container) {
             totalSeconds += parseDuration(timeSpan.textContent);
         }
     });
+
     return formatDuration(totalSeconds);
 }
 
@@ -167,6 +176,7 @@ function reverseOrder(container) {
 const selectedItems = new Set();
 let bulkToolbar = null;
 let isConfirmingDelete = false;
+let deleteConfirmTimer = null;
 
 function updateBulkToolbar(panel) {
     const existing = document.querySelector('.byp-bulk-actions');
@@ -188,17 +198,21 @@ function updateBulkToolbar(panel) {
     bulkToolbar.innerHTML = '';
 
     if (selectedItems.size > 0) {
+        const selectedArr = Array.from(selectedItems);
+        const selectedDuration = calculateDuration(panel, selectedArr);
+
         const countSpan = document.createElement('span');
         countSpan.className = 'byp-bulk-count';
-        countSpan.textContent = `${selectedItems.size} Selected`;
+        countSpan.innerHTML = `${selectedItems.size} Selected <span style="opacity:0.7; font-weight:400; margin-left:4px;">(${selectedDuration})</span>`;
         bulkToolbar.appendChild(countSpan);
 
         const delBtnText = isConfirmingDelete ? 'Are you sure?' : 'Delete';
         const delBtn = createButton(delBtnText, ICONS.delete, () => {
             if (!isConfirmingDelete) {
                 isConfirmingDelete = true;
+                if (deleteConfirmTimer) clearTimeout(deleteConfirmTimer);
                 updateBulkToolbar(panel);
-                setTimeout(() => {
+                deleteConfirmTimer = setTimeout(() => {
                     if (isConfirmingDelete) {
                         isConfirmingDelete = false;
                         updateBulkToolbar(panel);
@@ -208,6 +222,7 @@ function updateBulkToolbar(panel) {
             }
 
             isConfirmingDelete = false;
+            if (deleteConfirmTimer) clearTimeout(deleteConfirmTimer);
             selectedItems.forEach(item => {
                 syncRemove(item);
                 toggleSelection(item, false);
@@ -221,8 +236,7 @@ function updateBulkToolbar(panel) {
         }, isConfirmingDelete ? 'Click again to confirm deletion' : 'Remove selected videos from playlist');
 
         if (isConfirmingDelete) {
-            delBtn.style.backgroundColor = '#cc0000';
-            delBtn.style.border = '1px solid #ff4e45';
+            delBtn.classList.add('byp-btn-danger');
         }
 
         bulkToolbar.appendChild(delBtn);
@@ -235,6 +249,7 @@ function updateBulkToolbar(panel) {
                     list.prepend(item);
                     syncMove(item, null);
                 });
+                updateBulkToolbar(panel);
             }
         }, 'Move selected to top');
         bulkToolbar.appendChild(moveTopBtn);
@@ -250,6 +265,7 @@ function updateBulkToolbar(panel) {
                         syncMove(item, item.previousElementSibling);
                     }
                 });
+                updateBulkToolbar(panel);
             }
         }, 'Move up');
         bulkToolbar.appendChild(moveUpBtn);
@@ -265,6 +281,7 @@ function updateBulkToolbar(panel) {
                         syncMove(item, item.previousElementSibling);
                     }
                 });
+                updateBulkToolbar(panel);
             }
         }, 'Move down');
         bulkToolbar.appendChild(moveDownBtn);
@@ -277,12 +294,14 @@ function updateBulkToolbar(panel) {
                     list.appendChild(item);
                     syncMove(item, item.previousElementSibling);
                 });
+                updateBulkToolbar(panel);
             }
         }, 'Move selected to bottom');
         bulkToolbar.appendChild(moveBottomBtn);
 
-        const clearBtn = createButton('Cancel', null, () => {
+        const clearBtn = createButton(null, ICONS.close, () => {
             isConfirmingDelete = false;
+            if (deleteConfirmTimer) clearTimeout(deleteConfirmTimer);
             selectedItems.forEach(item => toggleSelection(item, false));
             updateBulkToolbar(panel);
         }, 'Clear selection');
@@ -292,17 +311,12 @@ function updateBulkToolbar(panel) {
     if (pendingMoves.length > 0) {
         if (selectedItems.size > 0) {
             const sep = document.createElement('div');
-            sep.style.width = '1px';
-            sep.style.height = '24px';
-            sep.style.background = 'rgba(255,255,255,0.2)';
-            sep.style.margin = '0 8px';
+            sep.className = 'sep';
             bulkToolbar.appendChild(sep);
         }
 
         const saveBtn = createButton(`Save Order (${pendingMoves.length})`, ICONS.save, () => processSave(), 'Save changes to YouTube');
         saveBtn.classList.add('byp-save-btn');
-        saveBtn.style.backgroundColor = '#cc0000';
-        saveBtn.style.border = 'none';
         bulkToolbar.appendChild(saveBtn);
     }
 
@@ -470,6 +484,7 @@ function injectControls(panel) {
 
         const reverseBtn = createButton('Reverse', ICONS.sort, () => {
             reverseOrder(panel);
+            updateDuration();
         }, 'Reverse playlist order');
 
         const filterBtn = createButton('Filter', ICONS.filter, () => {
@@ -495,6 +510,59 @@ function injectControls(panel) {
         } else {
             injectionPoint.appendChild(controlsDiv);
         }
+
+        const searchContainer = document.createElement('div');
+        searchContainer.className = 'byp-search-container';
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.className = 'byp-search-input';
+        searchInput.placeholder = 'Search playlist...';
+
+        const searchIcon = document.createElement('div');
+        searchIcon.innerHTML = ICONS.search.replace('viewBox', 'class="byp-search-icon" viewBox');
+
+        searchContainer.appendChild(searchIcon);
+        searchContainer.appendChild(searchInput);
+
+        searchContainer.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+        });
+
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+            e.stopPropagation();
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = e.target.value.toLowerCase();
+                const items = panel.querySelectorAll('ytd-playlist-panel-video-renderer');
+                let visibleCount = 0;
+                items.forEach(item => {
+                    const titleEl = item.querySelector('#video-title');
+                    if (titleEl) {
+                        const title = titleEl.textContent.trim().toLowerCase();
+                        if (query === '' || title.includes(query)) {
+                            item.classList.remove('byp-hidden');
+                            visibleCount++;
+                        } else {
+                            item.classList.add('byp-hidden');
+                        }
+                    }
+                });
+                updateDuration();
+            }, 300);
+        });
+
+        controlsDiv.parentNode.insertBefore(searchContainer, controlsDiv);
+
+        const selectAllBtn = createButton(null, ICONS.selectAll, () => {
+            const visibleItems = panel.querySelectorAll('ytd-playlist-panel-video-renderer:not(.byp-hidden):not(.byp-removing)');
+            const allSelected = Array.from(visibleItems).every(i => selectedItems.has(i));
+
+            visibleItems.forEach(item => toggleSelection(item, !allSelected));
+            updateBulkToolbar(panel);
+        }, 'Select All');
+        controlsDiv.appendChild(selectAllBtn);
 
         enableDragAndDrop(panel);
         enableSelection(panel);

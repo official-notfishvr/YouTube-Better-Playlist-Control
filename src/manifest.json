@@ -1,34 +1,44 @@
 {
-    "manifest_version": 3,
-    "name": "YouTube Better Playlist Control",
-    "version": "1.0",
-    "description": "gives a better control over YouTube playlist panel",
-    "permissions": [
-        "activeTab",
-        "scripting"
-    ],
-    "content_scripts": [
-        {
-            "matches": [
-                "*://*.youtube.com/*"
-            ],
-            "js": [
-                "content.js"
-            ],
-            "css": [
-                "result.css"
-            ],
-            "run_at": "document_idle"
-        }
-    ],
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "injected.js"
-            ],
-            "matches": [
-                "*://*.youtube.com/*"
-            ]
-        }
-    ]
+  "manifest_version": 3,
+  "name": "YouTube Better Playlist Control",
+  "version": "1.0",
+  "description": "Gives better control over the YouTube playlist panel",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "result.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "injected.js"
+      ],
+      "matches": [
+        "*://*.youtube.com/*"
+      ]
+    }
+  ],
+  "homepage_url": "https://github.com/official-notfishvr/YouTube-Better-Playlist-Control",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "youtube-better-playlist-control@notfishvr.com",
+      "strict_min_version": "109.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  }
 }

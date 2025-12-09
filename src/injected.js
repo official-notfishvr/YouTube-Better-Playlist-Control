@@ -91,13 +91,16 @@ async function moveVideo(triggerVideoId, predecessorVideoId) {
     }
 }
 
-async function removeVideo(videoId) {
+async function removeVideo(uid) {
     const data = getClientData();
     if (!data || !data.apiKey || !data.playlistId) return;
 
     const items = Array.from(document.querySelectorAll('ytd-playlist-panel-video-renderer'));
-    const item = items.find(i => i.data?.videoId === videoId);
-    if (!item) return;
+    const item = items.find(i => i.dataset.bypUid === uid);
+    if (!item) {
+        console.warn('[BYP] Could not find item to remove via UID', uid);
+        return;
+    }
 
     const setVideoId = item.data?.playlistSetVideoId;
     if (!setVideoId) return;
@@ -106,7 +109,7 @@ async function removeVideo(videoId) {
         context: data.context,
         actions: [
             {
-                action: "ACTION_REMOVE_VIDEO_BY_SET_VIDEO_ID",
+                action: "ACTION_REMOVE_VIDEO",
                 setVideoId: setVideoId
             }
         ],
@@ -135,6 +138,6 @@ window.addEventListener('message', (event) => {
     if (event.data.type === 'BYP_MOVE') {
         moveVideo(event.data.videoId, event.data.afterVideoId);
     } else if (event.data.type === 'BYP_REMOVE') {
-        removeVideo(event.data.videoId);
+        removeVideo(event.data.uid);
     }
 });

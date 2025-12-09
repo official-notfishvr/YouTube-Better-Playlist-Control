@@ -83,16 +83,18 @@ function syncMove(item, afterItem) {
 }
 
 function syncRemove(item) {
+    const uid = Date.now().toString(36) + Math.random().toString(36).substr(2);
+    item.dataset.bypUid = uid;
+
     if (IsOwner()) {
-        const vid = getVideoId(item);
-        if (vid) {
-            window.postMessage({
-                type: 'BYP_REMOVE',
-                videoId: vid
-            }, '*');
-        }
+        window.postMessage({
+            type: 'BYP_REMOVE',
+            uid: uid
+        }, '*');
     }
-    item.remove();
+
+    item.classList.add('byp-removing');
+    setTimeout(() => item.remove(), 2000);
 }
 
 async function processSave() {
@@ -119,8 +121,9 @@ async function processSave() {
 }
 
 function calculateDuration(container) {
-    const items = container.querySelectorAll('ytd-playlist-panel-video-renderer:not(.byp-hidden)');
+    const items = container.querySelectorAll('ytd-playlist-panel-video-renderer:not(.byp-hidden):not(.byp-removing)');
     let totalSeconds = 0;
+
     items.forEach(item => {
         const timeSpan = item.querySelector('ytd-thumbnail-overlay-time-status-renderer span#text');
         if (timeSpan) {
@@ -163,6 +166,7 @@ function reverseOrder(container) {
 
 const selectedItems = new Set();
 let bulkToolbar = null;
+let isConfirmingDelete = false;
 
 function updateBulkToolbar(panel) {
     const existing = document.querySelector('.byp-bulk-actions');
@@ -189,15 +193,38 @@ function updateBulkToolbar(panel) {
         countSpan.textContent = `${selectedItems.size} Selected`;
         bulkToolbar.appendChild(countSpan);
 
-        const delBtn = createButton('Delete', ICONS.delete, () => {
+        const delBtnText = isConfirmingDelete ? 'Are you sure?' : 'Delete';
+        const delBtn = createButton(delBtnText, ICONS.delete, () => {
+            if (!isConfirmingDelete) {
+                isConfirmingDelete = true;
+                updateBulkToolbar(panel);
+                setTimeout(() => {
+                    if (isConfirmingDelete) {
+                        isConfirmingDelete = false;
+                        updateBulkToolbar(panel);
+                    }
+                }, 3000);
+                return;
+            }
+
+            isConfirmingDelete = false;
             selectedItems.forEach(item => {
                 syncRemove(item);
                 toggleSelection(item, false);
             });
             updateBulkToolbar(panel);
             const dur = panel.querySelector('.byp-duration');
-            if (dur) dur.click();
-        });
+            if (dur) {
+                const time = calculateDuration(panel);
+                dur.innerHTML = ICONS.clock + `<span>${time}</span>`;
+            }
+        }, isConfirmingDelete ? 'Click again to confirm deletion' : 'Remove selected videos from playlist');
+
+        if (isConfirmingDelete) {
+            delBtn.style.backgroundColor = '#cc0000';
+            delBtn.style.border = '1px solid #ff4e45';
+        }
+
         bulkToolbar.appendChild(delBtn);
 
         const moveTopBtn = createButton('Top', ICONS.top, () => {
@@ -209,7 +236,7 @@ function updateBulkToolbar(panel) {
                     syncMove(item, null);
                 });
             }
-        });
+        }, 'Move selected to top');
         bulkToolbar.appendChild(moveTopBtn);
 
         const moveUpBtn = createButton(null, ICONS.up, () => {
@@ -224,7 +251,7 @@ function updateBulkToolbar(panel) {
                     }
                 });
             }
-        });
+        }, 'Move up');
         bulkToolbar.appendChild(moveUpBtn);
 
         const moveDownBtn = createButton(null, ICONS.down, () => {
@@ -239,7 +266,7 @@ function updateBulkToolbar(panel) {
                     }
                 });
             }
-        });
+        }, 'Move down');
         bulkToolbar.appendChild(moveDownBtn);
 
         const moveBottomBtn = createButton('Bottom', ICONS.bottom, () => {
@@ -251,13 +278,14 @@ function updateBulkToolbar(panel) {
                     syncMove(item, item.previousElementSibling);
                 });
             }
-        });
+        }, 'Move selected to bottom');
         bulkToolbar.appendChild(moveBottomBtn);
 
         const clearBtn = createButton('Cancel', null, () => {
+            isConfirmingDelete = false;
             selectedItems.forEach(item => toggleSelection(item, false));
             updateBulkToolbar(panel);
-        });
+        }, 'Clear selection');
         bulkToolbar.appendChild(clearBtn);
     }
 
@@ -271,7 +299,7 @@ function updateBulkToolbar(panel) {
             bulkToolbar.appendChild(sep);
         }
 
-        const saveBtn = createButton(`Save Order (${pendingMoves.length})`, ICONS.save, () => processSave());
+        const saveBtn = createButton(`Save Order (${pendingMoves.length})`, ICONS.save, () => processSave(), 'Save changes to YouTube');
         saveBtn.classList.add('byp-save-btn');
         saveBtn.style.backgroundColor = '#cc0000';
         saveBtn.style.border = 'none';
@@ -402,10 +430,13 @@ function enableDragAndDrop(container) {
     });
 }
 
-function createButton(text, iconHtml, onClick) {
+function createButton(text, iconHtml, onClick, title) {
     const btn = document.createElement('button');
     btn.innerHTML = (iconHtml || '') + (text ? `<span>${text}</span>` : '');
     btn.className = 'byp-button';
+    if (title || text) {
+        btn.title = title || text;
+    }
     btn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -439,19 +470,21 @@ function injectControls(panel) {
 
         const reverseBtn = createButton('Reverse', ICONS.sort, () => {
             reverseOrder(panel);
-        });
+        }, 'Reverse playlist order');
 
         const filterBtn = createButton('Filter', ICONS.filter, () => {
             isFiltered = !isFiltered;
             if (isFiltered) {
                 const count = toggleWatched(panel, false);
                 filterBtn.innerHTML = ICONS.filter + `<span>Show All</span>`;
+                filterBtn.title = "Show all videos";
             } else {
                 toggleWatched(panel, true);
                 filterBtn.innerHTML = ICONS.filter + `<span>Filter Watched</span>`;
+                filterBtn.title = "Hide watched videos";
             }
             updateDuration();
-        });
+        }, 'Hide watched videos');
 
         controlsDiv.appendChild(durSpan);
         controlsDiv.appendChild(filterBtn);
